@@ -1,0 +1,2836 @@
+{
+	"info": {
+		"_postman_id": "0d23e6e8-d355-4e1f-9d74-fd23738d758f",
+		"name": "Create ReST API Assets",
+		"description": "# Create Rest Assets\n\nStandardizing practices & process automation by\n\n*   Automating controls\n*   Enforcing standards\n*   Generating evidence\n    \n\n![](https://i.imgur.com/9E9b8gf.png)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22152014"
+	},
+	"item": [
+		{
+			"name": "Automate API assets",
+			"item": [
+				{
+					"name": "Fetch Schema from GItHub",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(pm.response.text());",
+									"var base64content = jsonData.content;",
+									"var buff = new Buffer(base64content, 'base64');",
+									"var content = buff.toString('ascii');",
+									"var jsonContent = JSON.parse(content);",
+									"pm.collectionVariables.set(\"schemaJSON\",JSON.stringify(jsonContent));",
+									"pm.collectionVariables.set(\"schemaTitle\",jsonContent.info.title);",
+									"console.log(content);",
+									"pm.collectionVariables.set(\"schema\", content);",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{GitHubPAT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{GitHubBaseURL}}/repos/{{GitHubRepoSlug}}/contents/{{GitHubRepoPath}}/{{GitHubSchemaFilename}}",
+							"host": [
+								"{{GitHubBaseURL}}"
+							],
+							"path": [
+								"repos",
+								"{{GitHubRepoSlug}}",
+								"contents",
+								"{{GitHubRepoPath}}",
+								"{{GitHubSchemaFilename}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create API",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"console.log(jsonData);",
+									"",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Should have valid response\", function () {",
+									"    pm.expect(jsonData.api).to.include.all.keys('id', 'name', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy');",
+									"    ",
+									"    // pm.expect(jsonData.api.name).to.be.equal('New API');",
+									"    pm.expect(jsonData.api.id).to.be.ok;",
+									"    pm.expect(jsonData.api.createdAt).to.be.ok;",
+									"    pm.expect(jsonData.api.createdBy).to.be.ok;",
+									"    pm.expect(jsonData.api.updatedAt).to.be.ok;",
+									"    pm.expect(jsonData.api.updatedBy).to.be.ok;",
+									"});",
+									"",
+									"",
+									"// Make sure you have an environment selected before enabling the following line",
+									"console.log(jsonData.api.id);",
+									"pm.collectionVariables.set('apiId', jsonData.api.id); "
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function randomIntFromInterval(min, max) { // min and max included ",
+									"  return Math.floor(Math.random() * (max - min + 1) + min);",
+									"}",
+									"",
+									"const rndInt = randomIntFromInterval(1, 99);",
+									"console.log(rndInt);",
+									"",
+									"pm.collectionVariables.set('randomInt',rndInt);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"name": "Content-Type",
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"api\": {\n\t\t\"name\": \"{{schemaTitle}} - {{randomInt}}\",\n\t\t\"summary\": \"{{$randomJobTitle}}\",\n\t\t\"description\": \"{{$randomJobDescriptor}}\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/apis?workspace={{workspaceID}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"apis"
+							],
+							"query": [
+								{
+									"key": "workspace",
+									"value": "{{workspaceID}}"
+								}
+							]
+						},
+						"description": "This call creates a new API with a default API Version.  \n\nRequest body should contain an `api` object which should atleast have a property `name`.\n\nResponse contains an `api` object with all the details related to the created API, namely, `id`, `name`, `summary`, `description`, etc. \n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Create API",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"name": "Content-Type",
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"api\": {\n\t\t\"name\": \"Sync Service API\",\n\t\t\"summary\": \"This is supposed to be a short summary.\",\n\t\t\"description\": \"This is description.\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/apis?workspace=c90a3482-f80d-43d6-9dfb-0830f5e43605",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"apis"
+									],
+									"query": [
+										{
+											"key": "workspace",
+											"value": "c90a3482-f80d-43d6-9dfb-0830f5e43605"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n\t\"api\": {\n\t\t\"id\": \"387c2863-6ee3-4a56-8210-225f774edade\",\n\t\t\"name\": \"Sync API\",\n\t\t\"summary\": \"This is a summary\",\n\t\t\"description\": \"This is supposed to handle markdown *descriptions*.\",\n\t\t\"createdBy\": \"5665\",\n\t\t\"createdAt\": \"2019-02-12 19:34:49\",\n\t\t\"updatedAt\": \"2019-02-12 19:34:49\"\n\t}\n}"
+						}
+					]
+				},
+				{
+					"name": "Get All API Versions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"console.log(\"VERSION JSON: \" + jsonData);",
+									"// Set the DRAFT versionId as an env variable",
+									"pm.collectionVariables.set('apiVersionId', jsonData.versions[0].id)",
+									"console.log(JSON.stringify(jsonData.versions[0]));",
+									"console.log(jsonData.versions[0].id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.getpostman.com/apis/{{apiId}}/versions",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"apis",
+								"{{apiId}}",
+								"versions"
+							]
+						},
+						"description": "This call fetches details about the all the API Versions in the specified API.\n\nThe response will contain an array `versions` object which would be a list of all the API Version along with their details.\n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Get All API versions",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://api.getpostman.com/apis/{{apiId}}/versions",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"apis",
+										"{{apiId}}",
+										"versions"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n\t\"versions\": [\n\t\t{\n\t      \"id\": \"024660a6-c837-46ca-91d8-7e8dd7c669de\",\n\t      \"name\": \"0.1\",\n\t      \"summary\": \"Summary\",\n\t      \"description\": \"Description\",\n\t      \"createdBy\": \"5665\",\n\t      \"createdAt\": \"2019-02-12 19:34:49\",\n\t      \"updatedAt\": \"2019-02-12 19:34:49\"\n\t    },\n\t    {\n\t      \"id\": \"00932d3b-20f1-454f-a77e-38b4023163ea\",\n\t      \"name\": \"0.2\",\n\t      \"summary\": \"Summary\",\n\t      \"description\": \"Description\",\n\t      \"createdBy\": \"5665\",\n\t      \"createdAt\": \"2019-02-12 19:34:49\",\n\t      \"updatedAt\": \"2019-02-12 19:34:49\"\n\t    }\n\t]\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Schema",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"//let schema = pm.environment.get(\"schema\");",
+									"//let schemaJSON = pm.environment.get(\"schemaJSON\");",
+									"let schemaJSON=JSON.parse(pm.collectionVariables.get(\"schema\"));",
+									"pm.collectionVariables.set(\"string_schema\",  JSON.stringify(JSON.stringify(schemaJSON)).substr(1).slice(0, -1));",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"// Set the schemaId in the env variable",
+									"pm.collectionVariables.set('schemaId', jsonData.schema.id)",
+									"",
+									"console.log(jsonData.schema.id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"name": "Content-Type",
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"schema\": {\n\t\t\"language\": \"json\",\n\t\t\"schema\":\"{{string_schema}}\",\n\t\t\"type\": \"openapi3\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/apis/{{apiId}}/versions/{{apiVersionId}}/schemas",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"apis",
+								"{{apiId}}",
+								"versions",
+								"{{apiVersionId}}",
+								"schemas"
+							]
+						},
+						"description": "Creates a schema. The request body must contain a `schema` object with the following properties:\n\n*   `type` — A **string** value that contains the schema's type. One of:\n    *   `openapi3_1`\n    *   `openapi3`\n    *   `openapi2`\n    *   `openapi1`\n    *   `raml`\n    *   `raml1`\n    *   `wsdl1`\n    *   `wsdl2`\n    *   `graphql`\n    *   `proto2`\n    *   `graphql`\n    *   `proto3`\n*   `language` — A **string** value that contains the schema's language. One of:\n    *   OpenAPI and RAML — `json` or `yaml`\n    *   GraphQL — `graphql`\n    *   WSDL — `xml`\n    *   Protobuf — `proto`\n*   `schema` — Optional. A **string** value that contains the schema's contents.\n    \n\n> Requires an API Key as the `X-Api-Key` request header or an `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Create schema",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"schema\": {\n\t\t\"language\": \"yaml\",\n\t\t\"schema\": \"openapi: \\\"3.0.0\\\"↵info:↵  version: 1.0.0↵  title: Swagger Petstore↵  license:↵    name: MIT↵servers:↵  - url: http://petstore.swagger.io/v1↵paths:↵  /pets:↵    get:↵      summary: List all pets↵      operationId: listPets↵      tags:↵        - pets↵      parameters:↵        - name: limit↵          in: query↵          description: How many items to return at one time (max 100)↵          required: false↵          schema:↵            type: integer↵            format: int32↵      responses:↵        200:↵          description: An paged array of pets↵          headers:↵            x-next:↵              description: A link to the next page of responses↵              schema:↵                type: string↵          content:↵            application/json:    ↵              schema:↵                $ref: \\\"#/components/schemas/Pets\\\"↵        default:↵          description: unexpected error↵          content:↵            application/json:↵              schema:↵                $ref: \\\"#/components/schemas/Error\\\"↵    post:↵      summary: Create a pet↵      operationId: createPets↵      tags:↵        - pets↵      responses:↵        201:↵          description: Null response↵        default:↵          description: unexpected error↵          content:↵            application/json:↵              schema:↵                $ref: \\\"#/components/schemas/Error\\\"\",\n\t\t\"type\": \"openapi3\"\n\t}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/apis/{{apiId}}/versions/{{versionId}}/schemas",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"apis",
+										"{{apiId}}",
+										"versions",
+										"{{versionId}}",
+										"schemas"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n\t\"schema\": {\n\t\t\"id\": \"e3b3a0b7-34d5-4fc5-83e0-118bd9e8c822\",\n\t\t\"language\": \"yaml\",\n\t\t\"apiVersion\": \"ad810c39-df60-434e-a76f-a2192cd8d81f\",\n\t\t\"type\": \"openapi3\",\n\t\t\"createdBy\": \"5665\",\n        \"updatedBy\": \"5665\",\n\t\t\"createdAt\": \"2021-05-22T13:17:07.000Z\",\n\t\t\"updatedAt\": \"2021-05-22T13:17:07.000Z\"\n\t}\n}"
+						}
+					]
+				},
+				{
+					"name": "Create collection from schema",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"// Set the colllectionId in the env variable",
+									"pm.collectionVariables.set('colllectionUID', jsonData.collection.uid)",
+									"//pm.environment.set('colllectionId', '9963739-1e021f88-f85c-4a1f-9046-1078002e9798')",
+									"",
+									"// console.log(jsonData.collection.id)"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomInt = pm.collectionVariables.get(\"randomInt\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"{{schemaTitle}} - {{randomInt}}\",\n\t\"relations\": [\n\t\t{\n\t\t\t\"type\": \"documentation\"\n        },\n        {\n            \"type\": \"integrationtest\"\n        },\n        {\n            \"type\": \"testsuite\"\n\t\t}\t\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/apis/{{apiId}}/versions/{{apiVersionId}}/schemas/{{schemaId}}/collections?workspace={{workspaceID}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"apis",
+								"{{apiId}}",
+								"versions",
+								"{{apiVersionId}}",
+								"schemas",
+								"{{schemaId}}",
+								"collections"
+							],
+							"query": [
+								{
+									"key": "workspace",
+									"value": "{{workspaceID}}"
+								}
+							]
+						},
+						"description": "This call creates a collection and links it to an API as one or multiple relations. \n\nRequest body requires two keys:\n- `name` - Name of the collection to be created.\n- `relations` - A list of relation(s) to be created.\n\nThe allowed relation types are `contracttest`, `integrationtest`, `testsuite`, and `documentation`.\n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Create collection from schema",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"My generated collection\",\n\t\"relations\": [\n\t\t{\n\t\t\t\"type\": \"contracttest\"\n\t\t}\t\n\t]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/apis/{{apiId}}/versions/{{apiVersionId}}/schemas/{{schemaId}}/collections?workspace=c90a3482-f80d-43d6-9dfb-0830f5e43605",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"apis",
+										"{{apiId}}",
+										"versions",
+										"{{apiVersionId}}",
+										"schemas",
+										"{{schemaId}}",
+										"collections"
+									],
+									"query": [
+										{
+											"key": "workspace",
+											"value": "c90a3482-f80d-43d6-9dfb-0830f5e43605"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"collection\": {\n        \"id\": \"e6b0d46a-8722-4f42-ab86-f5f473187ddf\",\n        \"uid\": \"112098-e6b0d46a-8722-4f42-ab86-f5f473187ddf\"\n    },\n    \"relations\": [\n        {\n            \"type\": \"contracttest\",\n            \"id\": \"4b40f06a-5a6a-448f-bfcd-a6dbcb68da22\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Mock",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"// Set the mockURL in the env variable",
+									"pm.collectionVariables.set('mockUrl', jsonData.mock.mockUrl)",
+									"pm.collectionVariables.set('mockUID', jsonData.mock.id)",
+									"pm.collectionVariables.set('baseUrl', jsonData.mock.mockUrl);",
+									"",
+									"",
+									"",
+									"",
+									"console.log(\"jsonData.mock.mock_Url \" + jsonData.mock.mockUrl)",
+									"console.log(\"jsonData.mock.mock_UId \" + jsonData.mock.id)"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomInt = pm.collectionVariables.get(\"randomInt\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"mock\": {\n        \"name\": \"{{schemaTitle}} - {{randomInt}}\",\n\t\t\"collection\": \"{{colllectionUID}}\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/mocks?workspace={{workspaceID}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"mocks"
+							],
+							"query": [
+								{
+									"key": "workspace",
+									"value": "{{workspaceID}}"
+								}
+							]
+						},
+						"description": "This endpoint allows you to create a mock on a collection. You can also provide an environment UID to resolve any environment variables in the collection.\n\nYou can also specify the context of a workspace to create a mock in directly by passing the `workspace` as a query param.\n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Create Mock in a Workspace",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"mock\": {\n    \"collection\": \"1679925-39fee52f-b806-3ffa-1173-00a6f5b183dc\",\n    \"environment\": \"1679925-0b9e9f15-3208-a2b1-22e0-d58392f01524\"\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/mocks?workspace={{workspace_id}}",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"mocks"
+									],
+									"query": [
+										{
+											"key": "workspace",
+											"value": "{{workspace_id}}",
+											"description": "The workspace ID in which the mock will be created"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"mock\": {\n        \"id\": \"0fca2246-c108-41f5-8454-cc032def329f\",\n        \"owner\": \"1679925\",\n        \"uid\": \"1679925-0fca2246-c108-41f5-8454-cc032def329f\",\n        \"collection\": \"1679925-39fee52f-b806-3ffa-1173-00a6f5b183dc\",\n        \"environment\": \"1679925-0b9e9f15-3208-a2b1-22e0-d58392f01524\",\n        \"mockUrl\": \"https://0fca2246-c108-41f5-8454-cc032def329f.mock.pstmn.io\"\n    }\n}"
+						},
+						{
+							"name": "Successful Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"mock\": {\n\t\t\"collection\": \"1679925-39fee52f-b806-3ffa-1173-00a6f5b183dc\",\n\t\t\"environment\": \"1679925-0b9e9f15-3208-a2b1-22e0-d58392f01524\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/mocks",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"mocks"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "The mime type of this content",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"mock\": {\n        \"id\": \"0fca2246-c108-41f5-8454-cc032def329f\",\n        \"owner\": \"1679925\",\n        \"uid\": \"1679925-0fca2246-c108-41f5-8454-cc032def329f\",\n        \"collection\": \"1679925-39fee52f-b806-3ffa-1173-00a6f5b183dc\",\n        \"environment\": \"1679925-0b9e9f15-3208-a2b1-22e0-d58392f01524\",\n        \"mockUrl\": \"https://0fca2246-c108-41f5-8454-cc032def329f.mock.pstmn.io\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Environment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"// Set the environmentID in the env variable",
+									"pm.collectionVariables.set('environmentUID', jsonData.environment.uid)",
+									"",
+									"console.log(\"Environment_UID \" + jsonData.environment.uid)"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomInt = pm.collectionVariables.get(\"randomInt\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"environment\": {\n        \"name\": \"{{schemaTitle}} -{{randomInt}}\",\n        \"values\": [\n            {\n                \"key\": \"baseUrl\",\n                \"value\": \"{{mockUrl}}\"\n            },\n            {\n                \"key\": \"foo\",\n                \"value\": \"bar\"\n            }\n        ]\n    }\n}"
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/environments?workspace={{workspaceID}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"environments"
+							],
+							"query": [
+								{
+									"key": "workspace",
+									"value": "{{workspaceID}}"
+								}
+							]
+						},
+						"description": "A sample body is added to the request that conforms to the following JSON schema:\n\n```json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"environment\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"name\": {\n              \"type\": \"string\",\n              \"maxLength\": 254,\n              \"minLength\": 1\n            },\n        \"values\": {\n          \"type\": \"array\",\n          \"maxItems\": 100,\n          \"additionalItems\": false,\n          \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"key\": {\n                  \"type\": \"string\",\n                  \"maxLength\": 254\n                  \"minLength\": 1\n                },\n                \"value\": { \"type\": \"string\" },\n                \"enabled\": { \"type\": \"boolean\" }\n              },\n              \"required\": [\"key\", \"value\"]\n            }\n        }\n      },\n      \"required\": [\"name\"]\n    }\n  },\n  \"required\": [\"environment\"]\n}\n```\n\nOn successful creation of the environment, the API returns the environment name and `id`.\n\nYou can also specify the context of a workspace to create an environment in directly by passing the `workspace` as a query param.\n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Create Environment in a Workspace",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"name": "Content-Type",
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"environment\": {\n        \"name\": \"Sample Environment Name (required)\",\n        \"values\": [\n            {\n                \"key\": \"variable_name_1\",\n                \"value\": \"The value of the variable\"\n            },\n            {\n                \"key\": \"variable_name_2\",\n                \"value\": \"\"\n            }\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/environments?workspace={{workspace_id}}",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"environments"
+									],
+									"query": [
+										{
+											"key": "workspace",
+											"value": "{{workspace_id}}",
+											"description": "The workspace ID in which the environment will be created"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"environment\": {\n        \"id\": \"f158266e-306b-4702-a2b9-e4ede7878b7a\",\n        \"name\": \"Sample Environment Name (required)\",\n        \"uid\": \"5665-f158266e-306b-4702-a2b9-e4ede7878b7a\"\n    }\n}"
+						},
+						{
+							"name": "Successful Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"name": "Content-Type",
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"environment\": {\n        \"name\": \"Sample Environment Name (required)\",\n        \"values\": [\n            {\"key\": \"variable_name_1\", \"value\": \"The value of the variable\"},\n            {\"key\": \"variable_name_2\", \"value\": \"\"}\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/environments",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"environments"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"environment\": {\n        \"id\": \"f158266e-306b-4702-a2b9-e4ede7878b7a\",\n        \"name\": \"Sample Environment Name (required)\",\n        \"uid\": \"5665-f158266e-306b-4702-a2b9-e4ede7878b7a\"\n    }\n}"
+						},
+						{
+							"name": "Failure Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/environments",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"environments"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": {\n        \"name\": \"malformedRequestError\",\n        \"message\": \"Found 1 errors with the supplied environment.\",\n        \"details\": [\n            \": must have required property 'environment'\"\n        ]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Monitor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"// Set the environmentID in the env variable",
+									"pm.collectionVariables.set('monitorUID', jsonData.monitor.uid)",
+									"console.log(\"monitor_UID \" + jsonData.monitor.uid)"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomInt = pm.collectionVariables.get(\"randomInt\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"monitor\": {\n    \"name\": \"{{schemaTitle}} monitor - {{randomInt}}\",\n    \"schedule\": {\n      \"cron\": \"*/5 * * * *\",\n      \"timezone\": \"America/Cancun\"\n    },\n    \"collection\": \"{{colllectionUID}}\",\n    \"environment\": \"{{environmentUID}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/monitors?workspace={{workspaceID}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"monitors"
+							],
+							"query": [
+								{
+									"key": "workspace",
+									"value": "{{workspaceID}}"
+								}
+							]
+						},
+						"description": "This endpoint allows you to create a monitor.\n\nSome sample `cron` values are:\n\n| Frequency                  | Cron Pattern   |\n|-----------------------|----------------|\n| Every 5 minutes       | `*/5 * * * *`  |\n| Every 30 minutes     | `*/30 * * * *` |\n| Every Hour         | `0 */1 * * *`  |\n| Every 6 Hours      | `0 */6 * * *`  |\n| Every day at 5pm    | `0 17 * * *`   |\n| Every Monday at 12pm  | `0 12 * * MON` |\n| Every weekday (Monday - Friday) at 6am | `0 6 * * MON-FRI` |\n\nNote: Currently, you can only create monitors at some limited schedules. You can head to [Postman Monitors](https://monitor.getpostman.com) to see the allowed schedules. \n\nFor more information about the format of the `timezone` value, check this [list of time zones.](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)\n\nYou can also specify the context of a workspace to create a monitor in directly by passing the `workspace` as a query param.\n\n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Cron Pattern Not Allowed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"monitor\": {\n\t\t\"name\": \"This is a Monitor Name\",\n\t\t\"schedule\": {\n\t\t\t\"cron\": \"* * * * *\",\n\t\t\t\"timezone\": \"Asia/Kolkata\"\n\t\t},\n\t\t\"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n\t\t\"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"cronPatternNotAllowedError\",\n    \"message\": \"The specified cron pattern is not allowed. Please check https://monitor.getpostman.com for the allowed schedules.\",\n    \"details\": {\n      \"pattern\": \"* * * * *\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Invalid Collection UID",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"monitor\": {\n\t\t\"name\": \"This is a Monitor Name\",\n\t\t\"schedule\": {\n\t\t\t\"cron\": \"0 0 * * *\",\n\t\t\t\"timezone\": \"Asia/Kolkata\"\n\t\t},\n\t\t\"collection\": \"8d05dd85-222c-1452-553b-e76a531b71ed\",\n\t\t\"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"invalidUidError\",\n    \"message\": \"The specified uid is invalid.\",\n    \"details\": {\n      \"param\": \"collection\",\n      \"uid\": \"8d05dd85-222c-1452-553b-e76a531b71ed\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Invalid Environment UID",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"monitor\": {\n\t\t\"name\": \"This is a Monitor Name\",\n\t\t\"schedule\": {\n\t\t\t\"cron\": \"0 0 * * *\",\n\t\t\t\"timezone\": \"Asia/Kolkata\"\n\t\t},\n\t\t\"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n\t\t\"environment\": \"8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"invalidUidError\",\n    \"message\": \"The specified uid is invalid.\",\n    \"details\": {\n      \"param\": \"environment\",\n      \"uid\": \"8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Monitor Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"name": "Content-Type",
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"monitor\": {\n    \"name\": \"This is a Monitor Name\",\n    \"schedule\": {\n      \"cron\": \"0 0 * * *\",\n      \"timezone\": \"Asia/Kolkata\"\n    },\n    \"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n    \"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "0e9f9b1f3e7218e7fd625cca14597bc771064a433bdd75b5a40196cef86c3fa29d483358e0b254b0a097ac305b132ec8481e2c5b835663fbed3bbb93b5a747cf8776efe85650e29a8e5f0a63906480e5b9e5a9860bef703234812ce9f65ea6dcbc099ac952d1c36338e2d192a793b82a1d8a2dd6dd031f831c08805a9e7ea1f55d46c54cf6ecaecbac84ddf581c8a267a116c0d6d935f19171bce93c6e040c0bd49fc1325bdb8929914548d7c0cae78796aba4073dc9ab63194a90e430919d8757c7ccb7b4dffc61b9cd4a748edc88d0b4ba727c83ea1af546908ff63a1e2ee9784a7b9af2f61997e0dd34adcb479151d11d0e8d67ba76050d55c7bbb88f2f700e14f848f6b929b441869fba53436eb7983660d0e4af82aa0dc5c47dddf974599280179889c03c3e38212eaa8270c641298f0a49b923ed3d04d61e2c6c25844b67df9e4814d378b440e8124e429dc292a147038a57c03e8b8ece700b376fcf8e002dca35142f97b5f49144e2f7477b99d767dff12bb37dd846419051bdaa4c6d931545a5df09bda8a80a336585e5d6ba44f087607512344f91321a359dc150cb411600fbf0d974f63116046d681d3f82a16e50e3bb69c463430e284f64e007f354a9ed4a2afdb27caad0414d451875ec78ea98924e32d8f881eb2c260b348e00baf782",
+									"key": "postman.sid"
+								}
+							],
+							"body": "{\n  \"monitor\": {\n    \"id\": \"1e6b6dfd-7ba4-4590-9ee1-5948102d7797\",\n    \"name\": \"Monitor Name\",\n    \"uid\": \"5852-1e6b6dfd-7ba4-4590-9ee1-5948102d7797\"\n  }\n}"
+						},
+						{
+							"name": "Invalid Timezone",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"monitor\": {\n\t\t\"name\": \"This is a Monitor Name\",\n\t\t\"schedule\": {\n\t\t\t\"cron\": \"0 0 * * *\",\n\t\t\t\"timezone\": \"this is not a timezone\"\n\t\t},\n\t\t\"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n\t\t\"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"invalidParamsError\",\n    \"message\": \"The request had invalid parameters\",\n    \"details\": {\n      \"param\": \"schedule.timezone\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Parameter Missing",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"paramMissingError\",\n    \"message\": \"Parameter is missing in the request.\",\n    \"details\": {\n      \"param\": \"monitor\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Create Monitor in a Workspace",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"monitor\": {\n    \"name\": \"This is a Monitor Name\",\n    \"schedule\": {\n      \"cron\": \"0 0 * * *\",\n      \"timezone\": \"Asia/Kolkata\"\n    },\n    \"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n    \"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors?workspace={{workspace_id}}",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									],
+									"query": [
+										{
+											"key": "workspace",
+											"value": "{{workspace_id}}",
+											"description": "The workspace ID in which the monitor will be created"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"monitor\": {\n        \"id\": \"1e6b6dfd-7ba4-4590-9ee1-5948102d7797\",\n        \"name\": \"Monitor Name\",\n        \"uid\": \"5852-1e6b6dfd-7ba4-4590-9ee1-5948102d7797\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Relations",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.log(\"MockUID: \" + pm.collectionVariables.get(\"MockUID\"));",
+									"console.log(\"MonitorID:\" + pm.collectionVariables.get(\"MonitorUID\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"mock\" : [\"{{mockUID}}\"],\n    \"monitor\": [\"{{monitorUID}}\"],\n    \"environment\" : [\"{{environmentUID}}\"]\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/apis/{{apiId}}/versions/{{apiVersionId}}/relations",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"apis",
+								"{{apiId}}",
+								"versions",
+								"{{apiVersionId}}",
+								"relations"
+							]
+						},
+						"description": "This call allows you to add existing Postman entities as new relations to an API. The request body should contain the relations to be created along with an array of entity IDs. \n\n<table>\n  <tr>\n    <th>Relation</th>\n    <th>Entity ID type</th>\n  <tr>\n  <tr>\n    <td>contracttest</td>\n    <td>Collection UIDs</td>\n  </tr>\n  <tr>\n    <td>integrationtest</td>\n    <td>Collection UIDs</td>\n  </tr>\n  <tr>\n    <td>documentation</td>\n    <td>Collection UIDs</td>\n  </tr>\n  <tr>\n    <td>testsuite</td>\n    <td>Collection UIDs</td>\n  </tr>\n  <tr>\n    <td>environment</td>\n    <td>Environment UIDs</td>\n  </tr>\n  <tr>\n    <td>mock</td>\n    <td>Mock IDs</td>\n  </tr>\n  <tr>\n    <td>monitor</td>\n    <td>Monitor IDs</td>\n  </tr>\n</table>\n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Create multiple relations from existing collections",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"contracttest\": [\"112098-a173931c-3340-4c14-b30f-ae62e5fbeb52\"],\n\t\"testsuite\": [\"112098-a173931c-3340-4c14-b30f-ae62e5fbeb52\", \"112098-47958a5a-a2a5-4330-9c9d-60c5166115f2\"],\n\t\"documentation\": [\"112098-47958a5a-a2a5-4330-9c9d-60c5166115f2\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/apis/{{apiId}}/versions/{{apiVersionId}}/relations",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"apis",
+										"{{apiId}}",
+										"versions",
+										"{{apiVersionId}}",
+										"relations"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"contracttest\": [\n        \"5bcece87-ca4b-4e75-a967-2a6845626164\"\n    ],\n    \"testsuite\": [\n        \"e525fa71-035e-4620-acda-ce878524f1e7\",\n        \"17a974b2-ce79-4b95-9d3f-217d6ff7e979\"\n    ],\n    \"documentation\": [\n        \"2084eba6-a17b-4751-8f03-ea60f30ba19c\"\n    ]\n}"
+						}
+					]
+				}
+			],
+			"description": "#### What are we doing here?\n\nImproving Developer Experience: **Automating** the process of setting up a Postman environment to allow developers to start building, testing and documenting APIs.\n\n1.  APIs must have documentation\n2.  APIs must have tests\n3.  APIs must have observability\n4.  Mock Servers help developers, QA, front end engineers quickly understand how the API functions.\n    \n\n![](https://i.imgur.com/UGJzFzW.png)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"console.log(pm.environment.name)"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Enforce OAS standards",
+			"item": [
+				{
+					"name": "Fetch the schema",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"// Set the mockURL in the env variable",
+									"pm.environment.set('lintingSchema', JSON.stringify(jsonData.schema.schema))",
+									"",
+									"console.log(\"lintingSchema \" + JSON.stringify(jsonData.schema.schema))",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.getpostman.com/apis/{{apiId}}/versions/{{apiVersionId}}/schemas/{{schemaId}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"apis",
+								"{{apiId}}",
+								"versions",
+								"{{apiVersionId}}",
+								"schemas",
+								"{{schemaId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Linting Collection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"console.log(jsonData)",
+									"let lintingCollectionUID = jsonData.collection.uid",
+									"console.log(lintingCollectionUID)",
+									"pm.collectionVariables.set('lintingCollectionUID', lintingCollectionUID);",
+									"",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response json data should not have errors\", function () {",
+									"    pm.response.to.have.jsonBody();",
+									"    pm.response.to.not.have.jsonBody('error');",
+									"});",
+									"",
+									"pm.test(\"response json should contain one collection\", function () {",
+									"    pm.expect(pm.response.json()).to.have.property('collection').and.be.an('object');",
+									"});",
+									"",
+									"pm.test(\"response json should return collection details\", function () {",
+									"    pm.expect(pm.response.json()).to.have.property('collection')",
+									"        .and.to.include.keys(['id', 'name', 'uid']);",
+									"});",
+									"",
+									"// additional tests to ensure that the relevant environment variables are present",
+									"// pm.test('\"postman_api_key\" variable should be present', function () {",
+									"//     pm.expect(pm.variables.get('postman_api_key')).to.be.a('string');",
+									"// });"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomInt = pm.environment.get(\"randomInt\")",
+									"",
+									"let lintingSchema = pm.environment.get('lintingSchema')",
+									"",
+									"console.log(lintingSchema)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"collection\": \n{\n\t\"info\": {\n\t\t\"name\": \"{{schemaTitle}} - {{randomInt}} - Linting\",\n\t\t\"description\": \"This collection lints an OpenAPI using a public API, passing an OpenAPI and a URL for a set of rules to be used when linting, returning the assertions using the test results for the response. The API doesn't require authentication and works to make linting on OAS documents as easy as possible. You can explore [more rules](http://rules.linting.org/) via the rules catalog we are creating to help improve the rulesets available and [submit a Github issue](https://github.com/postman-open-technologies/linting-rules/issues) if there is a rule you'd like to see or need help with.\",\n\t\t\"schema\": \"https://schema.getpostman.com/json/collection/v2.1.0/collection.json\"\n\t},\n\t\"item\": [\n\t\t{\n\t\t\t\"name\": \"Lint OpenAPI\",\n\t\t\t\"event\": [\t\n\t\t\t\t{\n\t\t\t\t\t\"listen\": \"test\",\n\t\t\t\t\t\"script\": {\n\t\t\t\t\t\t\"exec\": [\n\t\t\t\t\t\t\t\"pm.test(\\\"Status code is 200\\\", function () {\",\n\t\t\t\t\t\t\t\"  pm.response.to.have.status(200);\",\n\t\t\t\t\t\t\t\"});\",\n\t\t\t\t\t\t\t\"\",\n\t\t\t\t\t\t\t\"if (pm.response.code !== 200) {\",\n\t\t\t\t\t\t\t\"  return;\",\n\t\t\t\t\t\t\t\"}\",\n\t\t\t\t\t\t\t\"\",\n\t\t\t\t\t\t\t\"const response = pm.response.json();\",\n\t\t\t\t\t\t\t\"\",\n\t\t\t\t\t\t\t\"const failureSeverity = ['error', 'warning', 'information', 'hint'];\",\n\t\t\t\t\t\t\t\"const v = [];\",\n\t\t\t\t\t\t\t\"\",\n\t\t\t\t\t\t\t\"for (result of response) {\",\n\t\t\t\t\t\t\t\"  if (result.status === 'failed') {\",\n\t\t\t\t\t\t\t\"    const { code, failure: { message, range, severity } } = result; \",\n\t\t\t\t\t\t\t\"    const sev = failureSeverity[severity]\",\n\t\t\t\t\t\t\t\"    pm.test(message, () => pm.expect.fail(`(${sev}) ${code}[${range.start.line},${range.start.character}]`));       \",\n\t\t\t\t\t\t\t\"    v.push(`<li><strong>${code}</strong> (${sev}) ${message}</li>`);\",\n\t\t\t\t\t\t\t\"  } else if (result.status === 'passed') {\",\n\t\t\t\t\t\t\t\"    const { code, message } = result; \",\n\t\t\t\t\t\t\t\"    pm.test(`${message} (${code})`, () => {\",\n\t\t\t\t\t\t\t\"      pm.expect(true).to.be.true;\",\n\t\t\t\t\t\t\t\"    });\",\n\t\t\t\t\t\t\t\"    v.push(`<li><strong>${code}</strong> (success) ${message}</li>`);\",\n\t\t\t\t\t\t\t\"  }\",\n\t\t\t\t\t\t\t\"}\",\n\t\t\t\t\t\t\t\"\",\n\t\t\t\t\t\t\t\"pm.visualizer.set(`<ul>${v.join('')}</ul>`);\"\n\t\t\t\t\t\t],\n\t\t\t\t\t\t\"type\": \"text/javascript\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"request\": {\n\t\t\t\t\"method\": \"POST\",\n\t\t\t\t\"header\": [],\n\t\t\t\t\"body\": {\n\t\t\t\t\t\"mode\": \"raw\",\n\t\t\t\t\t\"raw\": {{lintingSchema}},\n\t\t\t\t\t\"options\": {\n\t\t\t\t\t\t\"raw\": {\n\t\t\t\t\t\t\t\"language\": \"json\"\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t},\n\t\t\t\t\"url\": {\n\t\t\t\t\t\"raw\": \"https://api.linting.org/linter?rulesUrl=https://rules.linting.org/rulesets/info/\",\n\t\t\t\t\t\"host\": [\n\t\t\t\t\t\t\"https://api.linting.org\"\n\t\t\t\t\t],\n\t\t\t\t\t\"path\": [\n\t\t\t\t\t\t\"linter\"\n\t\t\t\t\t],\n\t\t\t\t\t\"query\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"rulesUrl\",\n\t\t\t\t\t\t\t\"value\": \"https://rules.linting.org/rulesets/info/\",\n\t\t\t\t\t\t\t\"description\": \"A dynamic ruleset built from multiple description rules. You can pass in any rules or ruleset of your own.\"\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t},\n\t\t\t\"response\": [\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Lint OpenAPI\",\n\t\t\t\t\t\"originalRequest\": {\n\t\t\t\t\t\t\"method\": \"POST\",\n\t\t\t\t\t\t\"header\": [],\n\t\t\t\t\t\t\"body\": {\n\t\t\t\t\t\t\t\"mode\": \"raw\",\n\t\t\t\t\t\t\t\"raw\": \"openapi: 3.0.0\\ninfo:\\n  version: v0.1.0\\n  title: Restaurants\\n  description: This is the API for managing detail of the restaurants.\\nservers:\\n- url: http://api.example.com/\\npaths:\\n  \\\"/restaurants\\\":\\n    get:\\n      summary: Restaurants\\n      operationId: getRestaurants\\n      parameters:\\n      - name: token\\n        in: header\\n        required: true\\n        schema:\\n          type: array\\n          items:\\n            type: integer\\n            format: int64\\n        style: simple\\n      tags:\\n      - Restaurant\\n      responses:\\n        '200':\\n          description: Restaurant\\n          content:\\n            application/json:\\n              schema:\\n                \\\"$ref\\\": \\\"#/components/schemas/RestaurantListing\\\"\\n    post:\\n      summary: Restaurant\\n      operationId: addRestaurant\\n      tags:\\n      - Restaurant\\n      requestBody:\\n        description: Restaurant\\n        content:\\n          application/json:\\n            schema:\\n              \\\"$ref\\\": \\\"#/components/schemas/Restaurant\\\"\\n      responses:\\n        '201':\\n          description: Restaurant\\n          content:\\n            application/json:\\n              schema:\\n                \\\"$ref\\\": \\\"#/components/schemas/Restaurant\\\"\\n  \\\"/restaurants/{restaurantId}\\\":\\n    get:\\n      summary: Restaurant\\n      operationId: getRestaurant\\n      parameters:\\n      - name: restaurantId\\n        in: path\\n        description: The unique id.\\n        required: true\\n        schema:\\n          type: string\\n      - name: newProperty\\n        in: query\\n        description: The unique id.\\n        required: true\\n        schema:\\n          type: string\\n      tags:\\n      - Restaurant\\n      responses:\\n        '200':\\n          description: Restaurant\\n          content:\\n            application/json:\\n              schema:\\n                \\\"$ref\\\": \\\"#/components/schemas/Restaurant\\\"\\n    put:\\n      summary: Restaurant\\n      operationId: updateRestaurant\\n      parameters:\\n      - name: restaurantId\\n        in: path\\n        description: The unique id.\\n        required: true\\n        schema:\\n          type: string\\n      tags:\\n      - Restaurant\\n      requestBody:\\n        description: Restaurant\\n        content:\\n          application/json:\\n            schema:\\n              \\\"$ref\\\": \\\"#/components/schemas/Restaurant\\\"\\n      responses:\\n        '204':\\n          description: Restaurant\\n    delete:\\n      summary: Restaurant\\n      operationId: deleteRestaurant\\n      parameters:\\n      - name: restaurantId\\n        in: path\\n        description: The unique id.\\n        required: true\\n        schema:\\n          type: string\\n      tags:\\n      - Restaurant\\n      responses:\\n        '204':\\n          description: Restaurant\\ncomponents:\\n  schemas:\\n    RestaurantListing:\\n      type: array\\n      items:\\n        \\\"$ref\\\": \\\"#/components/schemas/Restaurant\\\"\\n    Restaurant:\\n      type: object\\n      properties:\\n        id:\\n          type: integer\\n          format: int64\\n        servesCuisine:\\n          description: The cuisine of the restaurant.\\n          type: string\\n        starRating:\\n          description: An official rating for a lodging business or food establishment,\\n            e.g. from national associations or standards bodies. Use the author property\\n            to indicate the rating organization, e.g. as an Organization with name\\n            such as (e.g. HOTREC, DEHOGA, WHR, or Hotelstars).\\n          type: object\\n          format: starRating\\n        menu:\\n          description: Either the actual menu as a structured representation, as text,\\n            or a URL of the menu.\\n          type: string\\n        acceptsReservations:\\n          description: Indicates whether a FoodEstablishment accepts reservations.\\n            Values can be Boolean, an URL at which reservations can be made or (for\\n            backwards compatibility) the strings ```Yes``` or ```No```.\\n          type: string\\n        hasMenu:\\n          description: Either the actual menu as a structured representation, as text,\\n            or a URL of the menu.\\n          type: string\\n\",\n\t\t\t\t\t\t\t\"options\": {\n\t\t\t\t\t\t\t\t\"raw\": {\n\t\t\t\t\t\t\t\t\t\"language\": \"json\"\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"url\": {\n\t\t\t\t\t\t\t\"raw\": \"https://api.linting.org/linter?rulesUrl=https://rules.linting.org/rulesets/info/\",\n\t\t\t\t\t\t\t\"host\": [\n\t\t\t\t\t\t\t\t\"https://api.linting.org\"\n\t\t\t\t\t\t\t],\n\t\t\t\t\t\t\t\"path\": [\n\t\t\t\t\t\t\t\t\"linter\"\n\t\t\t\t\t\t\t],\n\t\t\t\t\t\t\t\"query\": [\n\t\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\t\"key\": \"rulesUrl\",\n\t\t\t\t\t\t\t\t\t\"value\": \"https://rules.linting.org/rulesets/info/\",\n\t\t\t\t\t\t\t\t\t\"description\": \"A dynamic ruleset built from multiple description rules. You can pass in any rules or ruleset of your own.\"\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t]\n\t\t\t\t\t\t}\n\t\t\t\t\t},\n\t\t\t\t\t\"status\": \"OK\",\n\t\t\t\t\t\"code\": 200,\n\t\t\t\t\t\"_postman_previewlanguage\": \"json\",\n\t\t\t\t\t\"header\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"Date\",\n\t\t\t\t\t\t\t\"value\": \"Wed, 02 Mar 2022 00:54:48 GMT\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"Content-Type\",\n\t\t\t\t\t\t\t\"value\": \"application/json; charset=utf-8\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"Transfer-Encoding\",\n\t\t\t\t\t\t\t\"value\": \"chunked\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"Connection\",\n\t\t\t\t\t\t\t\"value\": \"keep-alive\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"x-amzn-requestid\",\n\t\t\t\t\t\t\t\"value\": \"ffad9d49-477f-4e8b-a4b6-32ea9c39aaaf\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"access-control-allow-origin\",\n\t\t\t\t\t\t\t\"value\": \"*\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"x-amz-apigw-id\",\n\t\t\t\t\t\t\t\"value\": \"OVL8vFlUPHcF7CQ=\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"x-amzn-trace-id\",\n\t\t\t\t\t\t\t\"value\": \"Root=1-621ec051-42a3a9f429814f9408c4823c\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"CF-Cache-Status\",\n\t\t\t\t\t\t\t\"value\": \"DYNAMIC\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"Expect-CT\",\n\t\t\t\t\t\t\t\"value\": \"max-age=604800, report-uri=\\\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\\\"\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"Report-To\",\n\t\t\t\t\t\t\t\"value\": \"{\\\"endpoints\\\":[{\\\"url\\\":\\\"https:\\\\/\\\\/a.nel.cloudflare.com\\\\/report\\\\/v3?s=mogGYA5DHT2mEI7iTx6i%2Bb8mVzA6O%2FB30RpxsrWL5IgSw7OMg%2BCMCDXz600HPoJCIp1rRDqpqNgC9tKXHYjX%2B5Zn%2FMunBku4IDYUD3k2VlsAuQb7i6U8RmSTd9GCn3xo%2BD0%3D\\\"}],\\\"group\\\":\\\"cf-nel\\\",\\\"max_age\\\":604800}\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"NEL\",\n\t\t\t\t\t\t\t\"value\": \"{\\\"success_fraction\\\":0,\\\"report_to\\\":\\\"cf-nel\\\",\\\"max_age\\\":604800}\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"Server\",\n\t\t\t\t\t\t\t\"value\": \"cloudflare\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"CF-RAY\",\n\t\t\t\t\t\t\t\"value\": \"6e56299b6fec7da6-LAX\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"Content-Encoding\",\n\t\t\t\t\t\t\t\"value\": \"br\"\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"key\": \"alt-svc\",\n\t\t\t\t\t\t\t\"value\": \"h3=\\\":443\\\"; ma=86400, h3-29=\\\":443\\\"; ma=86400\"\n\t\t\t\t\t\t}\n\t\t\t\t\t],\n\t\t\t\t\t\"cookie\": [],\n\t\t\t\t\t\"body\": \"[\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-title\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information object title.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-title-max-length\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs information titles are not longer than 50 characters.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-title-word-check\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs info object title do not contain certain words.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-title-in-kebab-case\\\",\\n        \\\"status\\\": \\\"failed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs information title are in Kebab case.\\\",\\n        \\\"failure\\\": {\\n            \\\"message\\\": \\\"The info object title needs to be in Kebab case.\\\",\\n            \\\"path\\\": [\\n                \\\"info\\\",\\n                \\\"title\\\"\\n            ],\\n            \\\"severity\\\": 0,\\n            \\\"source\\\": \\\"<REQUEST_BODY_0>\\\",\\n            \\\"range\\\": {\\n                \\\"start\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 54\\n                },\\n                \\\"end\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 67\\n                }\\n            }\\n        }\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-summary\\\",\\n        \\\"status\\\": \\\"failed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information object summary.\\\",\\n        \\\"failure\\\": {\\n            \\\"message\\\": \\\"The info object should have a summary.\\\",\\n            \\\"path\\\": [\\n                \\\"info\\\"\\n            ],\\n            \\\"severity\\\": 0,\\n            \\\"source\\\": \\\"<REQUEST_BODY_0>\\\",\\n            \\\"range\\\": {\\n                \\\"start\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 26\\n                },\\n                \\\"end\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 139\\n                }\\n            }\\n        }\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-summary-max-length\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs information object summary are not too long.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-summary-word-check\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs information object summary do not contain some words.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-description\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information description.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-description-max-length\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all APIs descriptions are under a specific length.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-description-word-check\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all APIs descriptions do not contain certain words.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-contact\\\",\\n        \\\"status\\\": \\\"failed\\\",\\n        \\\"message\\\": \\\"Ensures that all APIs have contact information.\\\",\\n        \\\"failure\\\": {\\n            \\\"message\\\": \\\"API must have a contact information available.\\\",\\n            \\\"path\\\": [\\n                \\\"info\\\"\\n            ],\\n            \\\"severity\\\": 0,\\n            \\\"source\\\": \\\"<REQUEST_BODY_0>\\\",\\n            \\\"range\\\": {\\n                \\\"start\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 26\\n                },\\n                \\\"end\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 139\\n                }\\n            }\\n        }\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-contact-name\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all APIs have contact name.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-contact-email\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all APIs have contact email.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-contact-url\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all APIs have contact URL.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-license\\\",\\n        \\\"status\\\": \\\"failed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information object license.\\\",\\n        \\\"failure\\\": {\\n            \\\"message\\\": \\\"The info object should have a license.\\\",\\n            \\\"path\\\": [\\n                \\\"info\\\"\\n            ],\\n            \\\"severity\\\": 0,\\n            \\\"source\\\": \\\"<REQUEST_BODY_0>\\\",\\n            \\\"range\\\": {\\n                \\\"start\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 26\\n                },\\n                \\\"end\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 139\\n                }\\n            }\\n        }\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-license-name\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information object license name.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-license-url\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information object license url.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-license-url-apache\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information object license url for Apache.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-license-url-mit\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information object license url for MIT.\\\"\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-terms-of-service\\\",\\n        \\\"status\\\": \\\"failed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information object terms of service.\\\",\\n        \\\"failure\\\": {\\n            \\\"message\\\": \\\"The info object should have a terms of service.\\\",\\n            \\\"path\\\": [\\n                \\\"info\\\"\\n            ],\\n            \\\"severity\\\": 0,\\n            \\\"source\\\": \\\"<REQUEST_BODY_0>\\\",\\n            \\\"range\\\": {\\n                \\\"start\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 26\\n                },\\n                \\\"end\\\": {\\n                    \\\"line\\\": 0,\\n                    \\\"character\\\": 139\\n                }\\n            }\\n        }\\n    },\\n    {\\n        \\\"code\\\": \\\"openapi-v3-info-version\\\",\\n        \\\"status\\\": \\\"passed\\\",\\n        \\\"message\\\": \\\"Ensures that all OpenAPIs have a information object version.\\\"\\n    }\\n]\"\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t],\n\t\"event\": [\n\t\t{\n\t\t\t\"listen\": \"prerequest\",\n\t\t\t\"script\": {\n\t\t\t\t\"type\": \"text/javascript\",\n\t\t\t\t\"exec\": [\n\t\t\t\t\t\"\"\n\t\t\t\t]\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"listen\": \"test\",\n\t\t\t\"script\": {\n\t\t\t\t\"type\": \"text/javascript\",\n\t\t\t\t\"exec\": [\n\t\t\t\t\t\"\"\n\t\t\t\t]\n\t\t\t}\n\t\t}\n\t],\n\t\"variable\": [\n\t\t{\n\t\t\t\"key\": \"baseUrl\",\n\t\t\t\"value\": \"https://api.linting.org\"\n\t\t}\n\t]\n}\n}"
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/collections?workspace={{workspaceID}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"collections"
+							],
+							"query": [
+								{
+									"key": "workspace",
+									"value": "{{workspaceID}}"
+								}
+							]
+						},
+						"description": "This endpoint allows you to create collections using the Postman Collection v2 format. For more information about the v2 schema, check the format [here](https://schema.getpostman.com/json/collection/v2.0.0/docs/index.html).\n\nOn successful creation of the collection, the response returns the collection `name`, `id` and the `uid`.\n\nYou can also specify the context of a workspace to create a collection in directly by passing the `workspace` as a query param.\n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Collection Already Exists",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"name": "Content-Type",
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"collection\": {\n        \"variables\": [],\n        \"info\": {\n            \"_postman_id\": \"ac03df1d-90f0-401d-aa57-39c395253c80\",\n            \"name\": \"Sample Collection\",\n            \"description\": \"This is just a sample collection.\",\n            \"schema\": \"https://schema.getpostman.com/json/collection/v2.0.0/collection.json\"\n        },\n        \"item\": [\n            {\n                \"name\": \"This is a folder\",\n                \"description\": \"\",\n                \"item\": [\n                    {\n                        \"name\": \"Sample POST Request\",\n                        \"request\": {\n                            \"url\": \"echo.getpostman.com/post\",\n                            \"method\": \"POST\",\n                            \"header\": [\n                                {\n                                    \"key\": \"Content-Type\",\n                                    \"value\": \"application/json\",\n                                    \"description\": \"\"\n                                }\n                            ],\n                            \"body\": {\n                                \"mode\": \"raw\",\n                                \"raw\": \"{\\n\\t\\\"data\\\": \\\"123\\\"\\n}\"\n                            },\n                            \"description\": \"This is a sample POST Request\"\n                        },\n                        \"response\": []\n                    }\n                ]\n            },\n            {\n                \"name\": \"Sample GET Request\",\n                \"request\": {\n                    \"url\": \"echo.getpostman.com/get\",\n                    \"method\": \"GET\",\n                    \"header\": [],\n                    \"body\": {\n                        \"mode\": \"formdata\",\n                        \"formdata\": []\n                    },\n                    \"description\": \"This is a sample GET Request\"\n                },\n                \"response\": []\n            }\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/collections",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"collections"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": {\n        \"name\": \"instanceFoundError\",\n        \"message\": \"The specified item already exists.\",\n        \"details\": {\n            \"item\": \"collection\",\n            \"id\": \"ac03df1d-90f0-401d-aa57-39c395253c80\"\n        }\n    }\n}"
+						},
+						{
+							"name": "Collection Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"name": "Content-Type",
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"collection\": {\n        \"variables\": [],\n        \"info\": {\n            \"name\": \"Sample Collection\",\n            \"description\": \"This is just a sample collection.\",\n            \"schema\": \"https://schema.getpostman.com/json/collection/v2.0.0/collection.json\"\n        },\n        \"item\": [\n            {\n                \"name\": \"This is a folder\",\n                \"description\": \"\",\n                \"item\": [\n                    {\n                        \"name\": \"Sample POST Request\",\n                        \"request\": {\n                            \"url\": \"echo.getpostman.com/post\",\n                            \"method\": \"POST\",\n                            \"header\": [\n                                {\n                                    \"key\": \"Content-Type\",\n                                    \"value\": \"application/json\",\n                                    \"description\": \"\"\n                                }\n                            ],\n                            \"body\": {\n                                \"mode\": \"raw\",\n                                \"raw\": \"{\\n\\t\\\"data\\\": \\\"123\\\"\\n}\"\n                            },\n                            \"description\": \"This is a sample POST Request\"\n                        },\n                        \"response\": []\n                    }\n                ]\n            },\n            {\n                \"name\": \"Sample GET Request\",\n                \"request\": {\n                    \"url\": \"echo.getpostman.com/get\",\n                    \"method\": \"GET\",\n                    \"header\": [],\n                    \"body\": {\n                        \"mode\": \"formdata\",\n                        \"formdata\": []\n                    },\n                    \"description\": \"This is a sample GET Request\"\n                },\n                \"response\": []\n            }\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/collections",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"collections"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"collection\": {\n    \"id\": \"2412a72c-1d8e-491b-aced-93809c0e94e9\",\n    \"name\": \"Sample Collection\",\n    \"uid\": \"5852-2412a72c-1d8e-491b-aced-93809c0e94e9\"\n  }\n}"
+						},
+						{
+							"name": "Create Collection in a Workspace",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"name": "Content-Type",
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"collection\": {\n        \"info\": {\n            \"name\": \"Sample Collection 65\",\n            \"description\": \"This is just a sample collection.\",\n            \"schema\": \"https://schema.getpostman.com/json/collection/v2.1.0/collection.json\"\n        },\n        \"item\": [\n            {\n                \"name\": \"This is a folder\",\n                \"item\": [\n                    {\n                        \"name\": \"Sample POST Request\",\n                        \"request\": {\n                            \"url\": \"https://postman-echo.com/post\",\n                            \"method\": \"POST\",\n                            \"header\": [\n                                {\n                                    \"key\": \"Content-Type\",\n                                    \"value\": \"application/json\"\n                                }\n                            ],\n                            \"body\": {\n                                \"mode\": \"raw\",\n                                \"raw\": \"{\\\"data\\\": \\\"123\\\"}\"\n                            },\n                            \"description\": \"This is a sample POST Request\"\n                        }\n                    }\n                ]\n            },\n            {\n                \"name\": \"Sample GET Request\",\n                \"request\": {\n                    \"url\": \"https://postman-echo/get\",\n                    \"method\": \"GET\",\n                    \"description\": \"This is a sample GET Request\"\n                }\n            }\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/collections?workspace={{workspace_id}}",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"collections"
+									],
+									"query": [
+										{
+											"key": "workspace",
+											"value": "{{workspace_id}}",
+											"description": "The workspace ID in which the collection is to be created"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"collection\": {\n        \"id\": \"2412a72c-1d8e-491b-aced-93809c0e94e9\",\n        \"name\": \"Sample Collection\",\n        \"uid\": \"5852-2412a72c-1d8e-491b-aced-93809c0e94e9\"\n    }\n}"
+						},
+						{
+							"name": "Malformed Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"collection\": {\n        \"item\": [\n            {\n                \"name\": \"This is a folder\",\n                \"item\": [\n                    {\n                        \"name\": \"Sample POST Request\",\n                        \"request\": {\n                            \"url\": \"https://postman-echo.com/post\",\n                            \"method\": \"POST\",\n                            \"header\": [\n                                {\n                                    \"key\": \"Content-Type\",\n                                    \"value\": \"application/json\"\n                                }\n                            ],\n                            \"body\": {\n                                \"mode\": \"raw\",\n                                \"raw\": \"{\\\"data\\\": \\\"123\\\"}\"\n                            },\n                            \"description\": \"This is a sample POST Request\"\n                        }\n                    }\n                ]\n            },\n            {\n                \"name\": \"Sample GET Request\",\n                \"request\": {\n                    \"url\": \"https://postman-echo/get\",\n                    \"method\": \"GET\",\n                    \"header\": {},\n                    \"description\": \"This is a sample GET Request\"\n                }\n            }\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/collections",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"collections"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": {\n        \"name\": \"malformedRequestError\",\n        \"message\": \"Found 8 errors with the supplied collection.\",\n        \"details\": [\n            \": must have required property 'info'\",\n            \"item/1/request/header: must be array\",\n            \"item/1/request/header: must be string\",\n            \"item/1/request/header: must match exactly one schema in oneOf\",\n            \"item/1/request: must be string\",\n            \"item/1/request: must match exactly one schema in oneOf\",\n            \"item/1: must have required property 'item'\",\n            \"item/1: must match exactly one schema in oneOf\"\n        ]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Linting Monitor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"// Set the environmentID in the env variable",
+									"pm.environment.set('lintingMonitorUID', jsonData.monitor.uid)",
+									"",
+									"console.log(\"lintingMonitor_UID \" + jsonData.monitor.uid)"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomInt = pm.environment.get(\"randomInt\")",
+									"",
+									"lintingCollectionID = pm.collectionVariables.get('lintingCollectionID')"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"monitor\": {\n    \"name\": \"{{schemaTitle}} - {{randomInt}} Linting Monitor\",\n    \"schedule\": {\n      \"cron\": \"*/5 * * * *\",\n      \"timezone\": \"America/Cancun\"\n    },\n    \"collection\": \"{{lintingCollectionUID}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/monitors?workspace={{workspaceID}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"monitors"
+							],
+							"query": [
+								{
+									"key": "workspace",
+									"value": "{{workspaceID}}"
+								}
+							]
+						},
+						"description": "This endpoint allows you to create a monitor.\n\nSome sample `cron` values are:\n\n| Frequency                  | Cron Pattern   |\n|-----------------------|----------------|\n| Every 5 minutes       | `*/5 * * * *`  |\n| Every 30 minutes     | `*/30 * * * *` |\n| Every Hour         | `0 */1 * * *`  |\n| Every 6 Hours      | `0 */6 * * *`  |\n| Every day at 5pm    | `0 17 * * *`   |\n| Every Monday at 12pm  | `0 12 * * MON` |\n| Every weekday (Monday - Friday) at 6am | `0 6 * * MON-FRI` |\n\nNote: Currently, you can only create monitors at some limited schedules. You can head to [Postman Monitors](https://monitor.getpostman.com) to see the allowed schedules. \n\nFor more information about the format of the `timezone` value, check this [list of time zones.](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)\n\nYou can also specify the context of a workspace to create a monitor in directly by passing the `workspace` as a query param.\n\n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Cron Pattern Not Allowed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"monitor\": {\n\t\t\"name\": \"This is a Monitor Name\",\n\t\t\"schedule\": {\n\t\t\t\"cron\": \"* * * * *\",\n\t\t\t\"timezone\": \"Asia/Kolkata\"\n\t\t},\n\t\t\"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n\t\t\"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"cronPatternNotAllowedError\",\n    \"message\": \"The specified cron pattern is not allowed. Please check https://monitor.getpostman.com for the allowed schedules.\",\n    \"details\": {\n      \"pattern\": \"* * * * *\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Invalid Collection UID",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"monitor\": {\n\t\t\"name\": \"This is a Monitor Name\",\n\t\t\"schedule\": {\n\t\t\t\"cron\": \"0 0 * * *\",\n\t\t\t\"timezone\": \"Asia/Kolkata\"\n\t\t},\n\t\t\"collection\": \"8d05dd85-222c-1452-553b-e76a531b71ed\",\n\t\t\"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"invalidUidError\",\n    \"message\": \"The specified uid is invalid.\",\n    \"details\": {\n      \"param\": \"collection\",\n      \"uid\": \"8d05dd85-222c-1452-553b-e76a531b71ed\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Invalid Environment UID",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"monitor\": {\n\t\t\"name\": \"This is a Monitor Name\",\n\t\t\"schedule\": {\n\t\t\t\"cron\": \"0 0 * * *\",\n\t\t\t\"timezone\": \"Asia/Kolkata\"\n\t\t},\n\t\t\"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n\t\t\"environment\": \"8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"invalidUidError\",\n    \"message\": \"The specified uid is invalid.\",\n    \"details\": {\n      \"param\": \"environment\",\n      \"uid\": \"8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Monitor Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"name": "Content-Type",
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"monitor\": {\n    \"name\": \"This is a Monitor Name\",\n    \"schedule\": {\n      \"cron\": \"0 0 * * *\",\n      \"timezone\": \"Asia/Kolkata\"\n    },\n    \"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n    \"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "0e9f9b1f3e7218e7fd625cca14597bc771064a433bdd75b5a40196cef86c3fa29d483358e0b254b0a097ac305b132ec8481e2c5b835663fbed3bbb93b5a747cf8776efe85650e29a8e5f0a63906480e5b9e5a9860bef703234812ce9f65ea6dcbc099ac952d1c36338e2d192a793b82a1d8a2dd6dd031f831c08805a9e7ea1f55d46c54cf6ecaecbac84ddf581c8a267a116c0d6d935f19171bce93c6e040c0bd49fc1325bdb8929914548d7c0cae78796aba4073dc9ab63194a90e430919d8757c7ccb7b4dffc61b9cd4a748edc88d0b4ba727c83ea1af546908ff63a1e2ee9784a7b9af2f61997e0dd34adcb479151d11d0e8d67ba76050d55c7bbb88f2f700e14f848f6b929b441869fba53436eb7983660d0e4af82aa0dc5c47dddf974599280179889c03c3e38212eaa8270c641298f0a49b923ed3d04d61e2c6c25844b67df9e4814d378b440e8124e429dc292a147038a57c03e8b8ece700b376fcf8e002dca35142f97b5f49144e2f7477b99d767dff12bb37dd846419051bdaa4c6d931545a5df09bda8a80a336585e5d6ba44f087607512344f91321a359dc150cb411600fbf0d974f63116046d681d3f82a16e50e3bb69c463430e284f64e007f354a9ed4a2afdb27caad0414d451875ec78ea98924e32d8f881eb2c260b348e00baf782",
+									"key": "postman.sid"
+								}
+							],
+							"body": "{\n  \"monitor\": {\n    \"id\": \"1e6b6dfd-7ba4-4590-9ee1-5948102d7797\",\n    \"name\": \"Monitor Name\",\n    \"uid\": \"5852-1e6b6dfd-7ba4-4590-9ee1-5948102d7797\"\n  }\n}"
+						},
+						{
+							"name": "Invalid Timezone",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"monitor\": {\n\t\t\"name\": \"This is a Monitor Name\",\n\t\t\"schedule\": {\n\t\t\t\"cron\": \"0 0 * * *\",\n\t\t\t\"timezone\": \"this is not a timezone\"\n\t\t},\n\t\t\"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n\t\t\"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"invalidParamsError\",\n    \"message\": \"The request had invalid parameters\",\n    \"details\": {\n      \"param\": \"schedule.timezone\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Parameter Missing",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "yes",
+									"key": "getpostmanlogin"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "813af79fd620c970d59f4e41275292a96873bb5065975eccf67a84cfdc24b448037430d26c2a29f4192ad492875ed7a0d53bbea8c63f760bb75c886624b4da560fc52c7f9f9e79837bee212f90b9a59c1dfcf94b95156b20f45169eab2ed93b0c38669819143ae41e45dfaac6a5f0cf6d5e76ca40134c3bd9ef9f5532ad6d179519aa0315fe4e6e157ee9d71c9f14aa9b0455ff84f94ae7519f1139d0cccdeeef7e2aafe1696cf640ec874c62d4d5bda3dbe17cf6083fb276b7f3355eb19162430f171166d19a7d79da028c76b3c2b97e88c93dc7183bc486d9d331b93b9a20de1216e84ca74f7b6887df61785d0b65be19f56283523f211fd43a772afa39aadc3b8dc011ba680b69a7e4fcda83be75d593c8ce6c6997bf530b57a8036881ea3d5b3c28d096099ca712f5d6916b453f1b338c455c4f861da638dffd05fd2a3dd5b9dd6dbe5f2c3a30e304363c9c2bcfbe5d9abeba9c06df16d155a70c6b0a9848f7446a5646e58640d7fad642df11350f528e4bacb5c446986cddf8f0c7ad10ec1067daccca962d6fb90aad8db55c2ffa1dc8716865350d5127cb69e44cfc4511836cbc5828c1c01370c7464fef1f07c716456a57a467bc1445ea88b705ef9c0c068948a73dca851804663befbc2d9aec7cfc3a2daf377b1a8c020091216d82504ff9b38c84234ad9b6f8c596a",
+									"key": "postman.sid"
+								},
+								{
+									"expires": "Invalid Date",
+									"hostOnly": false,
+									"httpOnly": false,
+									"domain": "getpostman.com",
+									"path": "/",
+									"secure": false,
+									"session": false,
+									"value": "b8ee90dd180562a5a21edad92ea0b987583b7599811884947b9aae88d0c060e8abb0c337534285da6defa4cfabba320b37b611b2c9586b81cb38220830b58440a2ff03756c898b89eb08799bc486c7dc08643ef1ee6e38e5988c4aafda47f1ed26c4218a23620f43d57aa19bb7f79762b394384215a7805e6b1c2cc092b6ac5ad8e8848b1ce655edba6f52820a2ac5acf3d289dda878c6a1fe62e88bb4159f605e8081afa2afce7a72a0c5d96515d566bcbf9cb3842cfc2b7f3a48badbcbfb9e5907b6451674d2c09cf6bf0b34b967edfc3a6389a834f7be21592ba2fbf7aa9eaaa6b87f99590813ded37c6e4ad17e7afcca74455b703d2d653e6ce063ce8eb195ce46c910a1b61fb71f13a8cb52ab2a7bded1b9b5a6b56ad5a66ceafc20afc70962a1f49b8abf2ce3f9e7cf3f44aaf0f41f81605b4ee612f3044d81b787a7cb128c56474a25cdc13803e9057603ead1f1fd6666ae5467ca9e250bb228dfd11dafd16345019bb7e06c58b27bf69d550cbfcef348bc746fdea61d4ea93c48d5f5e4e729adf18655669170f0a059025a79fb2a48f924d9748895a42780d1a9fae32ebf2d57df434c60b675412e217d126b9edbd28b949dfcbcbc8518aa51339d3e1d1f37c6cac4866064c54a476cf94d749a570938a7ad3ce28a9f1c5ea6623b",
+									"key": "postman-staging.sid"
+								}
+							],
+							"body": "{\n  \"error\": {\n    \"name\": \"paramMissingError\",\n    \"message\": \"Parameter is missing in the request.\",\n    \"details\": {\n      \"param\": \"monitor\"\n    }\n  }\n}"
+						},
+						{
+							"name": "Create Monitor in a Workspace",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"monitor\": {\n    \"name\": \"This is a Monitor Name\",\n    \"schedule\": {\n      \"cron\": \"0 0 * * *\",\n      \"timezone\": \"Asia/Kolkata\"\n    },\n    \"collection\": \"5852-8d05dd85-222c-1452-553b-e76a531b71ed\",\n    \"environment\": \"5852-8a4c21ea-2a36-40d1-a82d-d717fac9d6ef\"\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/monitors?workspace={{workspace_id}}",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"monitors"
+									],
+									"query": [
+										{
+											"key": "workspace",
+											"value": "{{workspace_id}}",
+											"description": "The workspace ID in which the monitor will be created"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": {
+										"content": "",
+										"type": "text/plain"
+									}
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"monitor\": {\n        \"id\": \"1e6b6dfd-7ba4-4590-9ee1-5948102d7797\",\n        \"name\": \"Monitor Name\",\n        \"uid\": \"5852-1e6b6dfd-7ba4-4590-9ee1-5948102d7797\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Linting Relations",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let lintingMonitorUID = pm.environment.get('lintingMonitorUID')",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"console.log(\"THE END\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Api-Key",
+								"value": "{{X-Api-Key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"monitor\": [\"{{lintingMonitorUID}}\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.getpostman.com/apis/{{apiId}}/versions/{{apiVersionId}}/relations",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"apis",
+								"{{apiId}}",
+								"versions",
+								"{{apiVersionId}}",
+								"relations"
+							]
+						},
+						"description": "This call allows you to add existing Postman entities as new relations to an API. The request body should contain the relations to be created along with an array of entity IDs. \n\n<table>\n  <tr>\n    <th>Relation</th>\n    <th>Entity ID type</th>\n  <tr>\n  <tr>\n    <td>contracttest</td>\n    <td>Collection UIDs</td>\n  </tr>\n  <tr>\n    <td>integrationtest</td>\n    <td>Collection UIDs</td>\n  </tr>\n  <tr>\n    <td>documentation</td>\n    <td>Collection UIDs</td>\n  </tr>\n  <tr>\n    <td>testsuite</td>\n    <td>Collection UIDs</td>\n  </tr>\n  <tr>\n    <td>environment</td>\n    <td>Environment UIDs</td>\n  </tr>\n  <tr>\n    <td>mock</td>\n    <td>Mock IDs</td>\n  </tr>\n  <tr>\n    <td>monitor</td>\n    <td>Monitor IDs</td>\n  </tr>\n</table>\n\n> Requires <a href=\"#authentication\">API Key</a> as `X-Api-Key` request header or `apikey` URL query parameter."
+					},
+					"response": [
+						{
+							"name": "Create multiple relations from existing collections",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"contracttest\": [\"112098-a173931c-3340-4c14-b30f-ae62e5fbeb52\"],\n\t\"testsuite\": [\"112098-a173931c-3340-4c14-b30f-ae62e5fbeb52\", \"112098-47958a5a-a2a5-4330-9c9d-60c5166115f2\"],\n\t\"documentation\": [\"112098-47958a5a-a2a5-4330-9c9d-60c5166115f2\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://api.getpostman.com/apis/{{apiId}}/versions/{{apiVersionId}}/relations",
+									"protocol": "https",
+									"host": [
+										"api",
+										"getpostman",
+										"com"
+									],
+									"path": [
+										"apis",
+										"{{apiId}}",
+										"versions",
+										"{{apiVersionId}}",
+										"relations"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"contracttest\": [\n        \"5bcece87-ca4b-4e75-a967-2a6845626164\"\n    ],\n    \"testsuite\": [\n        \"e525fa71-035e-4620-acda-ce878524f1e7\",\n        \"17a974b2-ce79-4b95-9d3f-217d6ff7e979\"\n    ],\n    \"documentation\": [\n        \"2084eba6-a17b-4751-8f03-ea60f30ba19c\"\n    ]\n}"
+						}
+					]
+				}
+			],
+			"description": "#### What are we doing here?\n\n**Enforce Standards**: Apply linting rules to enforce standards and governance to comply with API guidelines.\n\nCreating automated tests and observability into the API specifications. Making sure those governance rules that US Bank cares about are meet.\n\n![](https://i.imgur.com/iL2ZFRh.png)"
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{postmanAPIKey}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "x-api-key",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "workspaceID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "lintingCollectionUID",
+			"value": ""
+		},
+		{
+			"key": "schemaSrcCode",
+			"value": ""
+		},
+		{
+			"key": "postmanAPIKey",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "GitHubBaseURL",
+			"value": "https://api.github.com",
+			"type": "string"
+		},
+		{
+			"key": "GitHubRepoSlug",
+			"value": "bryancross/Postman-stuff",
+			"type": "string"
+		},
+		{
+			"key": "GitHubRepoPath",
+			"value": "postman/schemas",
+			"type": "string"
+		},
+		{
+			"key": "GitHubSchemaFilename",
+			"value": "catfacts.json",
+			"type": "string"
+		},
+		{
+			"key": "GitHubPAT",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "apiVersionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "apiId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "schemaId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "mockUrl",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "schema",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "schemaJSON",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "lintingMonitorUid",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "lintingSchema",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "randomInt",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "collectionIds",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "schemaTitle",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "string_schema",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "baseUrl",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "collectionUID",
+			"value": ""
+		},
+		{
+			"key": "environmentUID",
+			"value": ""
+		},
+		{
+			"key": "monitorUID",
+			"value": ""
+		},
+		{
+			"key": "mockUID",
+			"value": ""
+		},
+		{
+			"key": "colllectionUID",
+			"value": ""
+		}
+	]
+}
