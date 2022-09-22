@@ -1,7 +1,7 @@
-extends: [[spectral:oas, all]]
+#extends: [[spectral:oas, all]]
 
 rules:
-  tag-description: false
+  #tag-description: false
   #example-value-or-externalValue: false
   #operation-summary-formatted: false
   #oas3-unused-components-schema: false
