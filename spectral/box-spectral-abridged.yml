@@ -24,9 +24,8 @@ rules:
     recommended: true
     message: "{{error}}"
     then:
-      function: pattern
-      functionOptions:
-        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
+      field: summary
+      function: truthy       
 
 
   ensure-param-description:
@@ -36,9 +35,8 @@ rules:
     recommended: true
     message: "{{error}}"
     then:
-      function: pattern
-      functionOptions:
-        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
+      field: summary
+      function: truthy       
 
   ensure-properties-description:
     description: Properties must have a description.
@@ -48,9 +46,8 @@ rules:
     resolved: true
     message: "{{error}}"
     then:
-      function: pattern
-      functionOptions:
-        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
+      field: summary
+      function: truthy        
 
   ensure-operation-id-format:
     description: An operation ID must follow our required format
@@ -60,6 +57,5 @@ rules:
     resolved: true
     message: "{{error}}"
     then:
-      function: pattern
-      functionOptions:
-        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
+      field: summary
+      function: truthy     
