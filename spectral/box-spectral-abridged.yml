@@ -1,0 +1,66 @@
+extends: [[spectral:oas, all]]
+
+rules:
+  tag-description: false
+  #example-value-or-externalValue: false
+  #operation-summary-formatted: false
+  #oas3-unused-components-schema: false
+  #oas3-valid-oas-content-example: false
+
+  ensure-endpoint-summary:
+    description: Endpoints must have a summary.
+    given: $.paths[*][*]
+    severity: error
+    recommended: true
+    message: "{{error}}"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
+
+  ensure-response-description:
+    description: Responses must have a description.
+    given: $.components.schemas[*]
+    severity: error
+    recommended: true
+    message: "{{error}}"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
+
+
+  ensure-param-description:
+    description: Parameters must have a description.
+    given: $..*.parameters[*]
+    severity: error
+    recommended: true
+    message: "{{error}}"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
+
+  ensure-properties-description:
+    description: Properties must have a description.
+    given: $..*.properties[*]
+    severity: error
+    recommended: true
+    resolved: true
+    message: "{{error}}"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
+
+  ensure-operation-id-format:
+    description: An operation ID must follow our required format
+    given: $.paths[*][*]
+    severity: error
+    recommended: true
+    resolved: true
+    message: "{{error}}"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
