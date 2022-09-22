@@ -14,7 +14,6 @@
         "tags": [
           "Breeds"
         ],
-        "summary": "Get a list of breeds",
         "description": "Returns a a list of breeds",
         "operationId": "getBreeds",
         "parameters": [

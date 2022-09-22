@@ -14,9 +14,8 @@ rules:
     recommended: true
     message: "{{error}}"
     then:
-      function: pattern
-      functionOptions:
-        match: "^(\/|[a-z0-9-.]+|{[a-zA-Z0-9_]+})+$"      
+      field: summary
+      function: truthy     
 
   ensure-response-description:
     description: Responses must have a description.
