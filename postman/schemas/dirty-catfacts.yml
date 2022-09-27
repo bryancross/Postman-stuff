@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.0
 info:
-  title: Cat Fact API
+  title: Dirty Cat Fact API (YAML)
   description: An API for facts about cats
   contact:
     email: contact@catfact.ninja
