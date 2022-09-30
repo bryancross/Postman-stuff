@@ -1,0 +1,20 @@
+id = 649b039e-ca4e-40b4-a4a8-28df76b02040
+
+[relations]
+
+[relations.collections]
+rootDirectory = postman/collections
+files[] = {"id":"23357111-42629626-a4a0-4993-bd65-17976ef03cb4","path":"Cat Fact API_787d4397-4f59-4892-805b-fbcfb88717a8.json","metaData":{}}
+files[] = {"id":"23357111-3f2b9e3a-11fa-46ab-953f-9c8d6784408d","path":"Dirty Cat Fact API (YAML).json","metaData":{}}
+
+[relations.collections.metaData]
+
+[relations.apiDefinition]
+rootDirectory = postman/schemas
+files[] = {"path":"catfacts.json","metaData":{}}
+files[] = {"path":"dirty-catfacts Copy.yml","metaData":{}}
+files[] = {"path":"dirty-catfacts.json","metaData":{}}
+files[] = {"path":"dirty-catfacts.yml","metaData":{}}
+
+[relations.apiDefinition.metaData]
+type = openapi:3
